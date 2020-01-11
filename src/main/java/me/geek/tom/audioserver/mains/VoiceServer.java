@@ -10,7 +10,7 @@ public class VoiceServer {
     private void run(String[] args) throws IOException {
         VoiceServerManager manager = new VoiceServerManager();
 
-        manager.begin(1337);
+        manager.begin(56789);
 
         Scanner s = new Scanner(System.in);
 

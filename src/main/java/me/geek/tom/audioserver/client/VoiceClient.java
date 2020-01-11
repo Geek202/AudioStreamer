@@ -25,7 +25,7 @@ public class VoiceClient extends Thread {
     private VoiceAudioOutput audioOutput;
 
     public VoiceClient(String ip) {
-        this(ip, 1337);
+        this(ip, 56789);
     }
 
     public VoiceClient(String ip, int port) {
