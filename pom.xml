@@ -6,7 +6,7 @@
 
     <groupId>me.geek.tom</groupId>
     <artifactId>AudioStreamer</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.1</version>
     <build>
         <plugins>
             <plugin>
@@ -20,5 +20,12 @@
         </plugins>
     </build>
 
+    <distributionManagement>
+        <repository>
+            <id>github</id>
+            <name>GitHub OWNER Apache Maven Packages</name>
+            <url>https://maven.pkg.github.com/Geek202/AudioStreamer</url>
+        </repository>
+    </distributionManagement>
 
 </project>

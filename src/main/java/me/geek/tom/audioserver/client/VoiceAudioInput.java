@@ -2,13 +2,20 @@ package me.geek.tom.audioserver.client;
 
 import javax.sound.sampled.*;
 import java.io.IOException;
+import java.util.function.Predicate;
 
 public class VoiceAudioInput extends Thread {
 
     private VoiceClient vc;
 
+    private Predicate<VoiceClient> canSend = vc -> true;
+
     private DataLine.Info mic;
     private TargetDataLine line;
+
+    public void setCanSend(Predicate<VoiceClient> canSend) {
+        this.canSend = canSend;
+    }
 
     public VoiceAudioInput(VoiceClient vc) {
         this.vc = vc;
@@ -28,19 +35,21 @@ public class VoiceAudioInput extends Thread {
             AudioInputStream audioInput = new AudioInputStream(line);
 
             while (vc.isRunning()) {
-                try {
-                    int available = audioInput.available();
-                    byte[] data = new byte[Math.min(available, 2200)];
+                while (canSend.test(vc) && vc.isRunning()) {
+                    try {
+                        int available = audioInput.available();
+                        byte[] data = new byte[Math.min(available, 2200)];
 
-                    int read = audioInput.read(data, 0, data.length);
+                        int read = audioInput.read(data, 0, data.length);
 
-                    if (read > 0) {
-                        vc.getOutputStream().writeInt(data.length);
-                        vc.getOutputStream().write(data);
+                        if (read > 0) {
+                            vc.getOutputStream().writeInt(data.length);
+                            vc.getOutputStream().write(data);
+                        }
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                        vc.shutdown();
                     }
-                } catch (IOException e) {
-                    e.printStackTrace();
-                    vc.shutdown();
                 }
             }
         } catch (LineUnavailableException e) {

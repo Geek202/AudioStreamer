@@ -3,6 +3,7 @@ package me.geek.tom.audioserver.client;
 import javax.sound.sampled.AudioFormat;
 import java.io.*;
 import java.net.Socket;
+import java.util.function.Predicate;
 
 public class VoiceClient extends Thread {
 
@@ -10,7 +11,10 @@ public class VoiceClient extends Thread {
     private AudioFormat format = new AudioFormat(16000F, 16, 1, true, true);
 
     private String ip;
+    private int port;
     private Socket socket;
+
+    private Predicate<VoiceClient> canSend;
 
     private boolean active = false;
 
@@ -21,13 +25,23 @@ public class VoiceClient extends Thread {
     private VoiceAudioOutput audioOutput;
 
     public VoiceClient(String ip) {
+        this(ip, 1337);
+    }
+
+    public VoiceClient(String ip, int port) {
+        this(ip, port, null);
+    }
+
+    public VoiceClient(String ip, int port, Predicate<VoiceClient> shouldSend) {
         this.ip = ip;
+        this.port = port;
+        this.canSend = shouldSend;
     }
 
     @Override
     public void run() {
         try {
-            socket = new Socket(ip, 1337);
+            socket = new Socket(ip, this.port);
             active = true;
 
             input = new DataInputStream(new BufferedInputStream(socket.getInputStream()));
@@ -38,6 +52,9 @@ public class VoiceClient extends Thread {
 
             audioInput.start();
             audioOutput.start();
+
+            if (canSend != null)
+                audioInput.setCanSend(canSend);
 
         } catch (IOException e) {
             e.printStackTrace();
