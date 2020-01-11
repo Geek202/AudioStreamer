@@ -47,7 +47,8 @@ public class VoiceConnection extends Thread {
 
                     owner.sendToAll(dataLen, audioData, VoiceConnection.this);
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    close();
+                } catch (Exception e) {
                     close();
                 }
             }

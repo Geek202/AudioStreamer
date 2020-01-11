@@ -47,7 +47,6 @@ public class VoiceAudioInput extends Thread {
                             vc.getOutputStream().write(data);
                         }
                     } catch (IOException e) {
-                        e.printStackTrace();
                         vc.shutdown();
                     }
                 }

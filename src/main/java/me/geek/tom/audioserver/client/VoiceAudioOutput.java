@@ -56,7 +56,6 @@ public class VoiceAudioOutput extends Thread {
                         Thread.sleep(20);
                     }
                 } catch (IOException e) {
-                    e.printStackTrace();
                     vc.shutdown();
                 } catch (InterruptedException ignored) {
                 }
