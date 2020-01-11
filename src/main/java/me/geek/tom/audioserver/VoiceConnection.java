@@ -72,5 +72,7 @@ public class VoiceConnection extends Thread {
             socket.close();
         } catch (IOException ignored) {
         }
+
+        owner.removeConnection(this);
     }
 }
