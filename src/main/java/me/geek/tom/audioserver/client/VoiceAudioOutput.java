@@ -1,9 +1,7 @@
 package me.geek.tom.audioserver.client;
 
-import javax.sound.sampled.AudioSystem;
-import javax.sound.sampled.DataLine;
-import javax.sound.sampled.LineUnavailableException;
-import javax.sound.sampled.SourceDataLine;
+import me.geek.tom.audioserver.client.audio.output.IAudioOutput;
+
 import java.io.EOFException;
 import java.io.IOException;
 
@@ -11,21 +9,17 @@ public class VoiceAudioOutput extends Thread {
 
     private VoiceClient vc;
 
-    private DataLine.Info speaker;
-    private SourceDataLine line;
+    private IAudioOutput output;
 
-    public VoiceAudioOutput(VoiceClient vc) {
+    public VoiceAudioOutput(VoiceClient vc, IAudioOutput output) {
         this.vc = vc;
-
-        this.speaker = new DataLine.Info(SourceDataLine.class, vc.getFormat());
+        this.output = output;
     }
 
     @Override
     public void run() {
         try {
-            line = (SourceDataLine) AudioSystem.getLine(speaker);
-            line.open(vc.getFormat(), 2200);
-            line.start();
+            this.output.start(this.vc);
             byte[] data = new byte[4096];
             int count;
             int length;
@@ -46,7 +40,7 @@ public class VoiceAudioOutput extends Thread {
                                 throw new EOFException();
 
                             try {
-                                line.write(data, 0, length);
+                                this.output.write(data, length);
                             } catch (IllegalArgumentException ignored) {
                             }
 
@@ -60,13 +54,12 @@ public class VoiceAudioOutput extends Thread {
                 } catch (InterruptedException ignored) {
                 }
             }
-        } catch (LineUnavailableException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
     public void shutdown() {
-        line.flush();
-        line.close();
+        this.output.cleanup();
     }
 }

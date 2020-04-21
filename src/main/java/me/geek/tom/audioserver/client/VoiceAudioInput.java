@@ -1,6 +1,7 @@
 package me.geek.tom.audioserver.client;
 
-import javax.sound.sampled.*;
+import me.geek.tom.audioserver.client.audio.input.IAudioInput;
+
 import java.io.IOException;
 import java.util.function.Predicate;
 
@@ -10,37 +11,28 @@ public class VoiceAudioInput extends Thread {
 
     private Predicate<VoiceClient> canSend = vc -> true;
 
-    private DataLine.Info mic;
-    private TargetDataLine line;
+    private IAudioInput input;
 
     public void setCanSend(Predicate<VoiceClient> canSend) {
         this.canSend = canSend;
     }
 
-    public VoiceAudioInput(VoiceClient vc) {
+    public VoiceAudioInput(VoiceClient vc, IAudioInput input) {
         this.vc = vc;
 
-        this.mic = new DataLine.Info(TargetDataLine.class, vc.getFormat());
+        this.input = input;
     }
 
     @Override
     public void run() {
         try {
-            if (!AudioSystem.isLineSupported(mic)) {
-                return;
-            }
-            line = (TargetDataLine) AudioSystem.getLine(mic);
-            line.open(vc.getFormat(), 2200);
-            line.start();
-            AudioInputStream audioInput = new AudioInputStream(line);
+            this.input.start(this.vc);
 
             while (vc.isRunning()) {
                 while (canSend.test(vc) && vc.isRunning()) {
                     try {
-                        int available = audioInput.available();
-                        byte[] data = new byte[Math.min(available, 2200)];
-
-                        int read = audioInput.read(data, 0, data.length);
+                        byte[] data = new byte[2200];
+                        int read = this.input.read(data, data.length);
 
                         if (read > 0) {
                             vc.getOutputStream().writeInt(data.length);
@@ -51,13 +43,12 @@ public class VoiceAudioInput extends Thread {
                     }
                 }
             }
-        } catch (LineUnavailableException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
     public void shutdown() {
-        line.flush();
-        line.close();
+        this.input.cleanup();
     }
 }

@@ -1,5 +1,8 @@
 package me.geek.tom.audioserver.client;
 
+import me.geek.tom.audioserver.client.audio.input.IAudioInput;
+import me.geek.tom.audioserver.client.audio.output.IAudioOutput;
+
 import javax.sound.sampled.AudioFormat;
 import java.io.*;
 import java.net.Socket;
@@ -24,18 +27,23 @@ public class VoiceClient extends Thread {
     private VoiceAudioInput audioInput;
     private VoiceAudioOutput audioOutput;
 
-    public VoiceClient(String ip) {
-        this(ip, 56789);
+    private final IAudioInput audioInputStream;
+    private final IAudioOutput audioOutputStream;
+
+    public VoiceClient(String ip, IAudioInput input, IAudioOutput output) {
+        this(ip, 56789, input, output);
     }
 
-    public VoiceClient(String ip, int port) {
-        this(ip, port, null);
+    public VoiceClient(String ip, int port, IAudioInput input, IAudioOutput output) {
+        this(ip, port, null, input, output);
     }
 
-    public VoiceClient(String ip, int port, Predicate<VoiceClient> shouldSend) {
+    public VoiceClient(String ip, int port, Predicate<VoiceClient> shouldSend, IAudioInput input, IAudioOutput output) {
         this.ip = ip;
         this.port = port;
         this.canSend = shouldSend;
+        this.audioInputStream = input;
+        this.audioOutputStream = output;
     }
 
     @Override
@@ -47,8 +55,8 @@ public class VoiceClient extends Thread {
             input = new DataInputStream(new BufferedInputStream(socket.getInputStream()));
             output = new DataOutputStream(new BufferedOutputStream(socket.getOutputStream()));
 
-            audioInput = new VoiceAudioInput(this);
-            audioOutput = new VoiceAudioOutput(this);
+            audioInput = new VoiceAudioInput(this, this.audioInputStream);
+            audioOutput = new VoiceAudioOutput(this, this.audioOutputStream);
 
             audioInput.start();
             audioOutput.start();

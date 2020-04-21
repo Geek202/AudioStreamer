@@ -1,6 +1,8 @@
 package me.geek.tom.audioserver.mains;
 
 import me.geek.tom.audioserver.client.VoiceClient;
+import me.geek.tom.audioserver.client.audio.input.JavaLineInput;
+import me.geek.tom.audioserver.client.audio.output.JavaLineOutput;
 
 import java.util.Scanner;
 
@@ -10,7 +12,7 @@ public class Client {
             System.out.println("Missing an argument for IP!");
             System.exit(1);
         }
-        VoiceClient client = new VoiceClient(args[0]);
+        VoiceClient client = new VoiceClient(args[0], new JavaLineInput(), new JavaLineOutput());
         client.start();
 
         Scanner scanner = new Scanner(System.in);
