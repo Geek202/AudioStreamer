@@ -1,11 +1,9 @@
 package me.geek.tom.audioserver.client.audio.input;
 
 import me.geek.tom.audioserver.client.VoiceClient;
+import me.geek.tom.audioserver.client.audio.JavaAudioUtil;
 
-import javax.sound.sampled.AudioInputStream;
-import javax.sound.sampled.AudioSystem;
-import javax.sound.sampled.DataLine;
-import javax.sound.sampled.TargetDataLine;
+import javax.sound.sampled.*;
 import java.io.IOException;
 
 public class JavaLineInput implements IAudioInput {
@@ -17,13 +15,14 @@ public class JavaLineInput implements IAudioInput {
 
     @Override
     public void start(VoiceClient vc) throws Exception {
-        this.mic = new DataLine.Info(TargetDataLine.class, vc.getFormat());
+        AudioFormat format = JavaAudioUtil.getFormat();
+        this.mic = new DataLine.Info(TargetDataLine.class, format);
 
         if (!AudioSystem.isLineSupported(mic)) {
             return;
         }
         line = (TargetDataLine) AudioSystem.getLine(mic);
-        line.open(vc.getFormat(), 2200);
+        line.open(format, 2200);
         line.start();
         audioInput = new AudioInputStream(line);
     }

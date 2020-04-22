@@ -10,9 +10,6 @@ import java.util.function.Predicate;
 
 public class VoiceClient extends Thread {
 
-
-    private AudioFormat format = new AudioFormat(16000F, 16, 1, true, true);
-
     private String ip;
     private int port;
     private Socket socket;
@@ -67,10 +64,6 @@ public class VoiceClient extends Thread {
         } catch (IOException e) {
             e.printStackTrace();
         }
-    }
-
-    public AudioFormat getFormat() {
-        return format;
     }
 
     public boolean isRunning() {
